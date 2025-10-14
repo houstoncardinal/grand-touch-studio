@@ -80,10 +80,35 @@ export default {
             height: "0",
           },
         },
+        "key-press": {
+          "0%": {
+            transform: "translateY(0px) scale(1)",
+          },
+          "100%": {
+            transform: "translateY(3px) scale(0.98)",
+          },
+        },
+        "glow-pulse": {
+          "0%, 100%": {
+            opacity: "0.8",
+            transform: "scale(1)",
+          },
+          "50%": {
+            opacity: "1",
+            transform: "scale(1.05)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "key-press": "key-press 0.1s ease-out",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+      },
+      boxShadow: {
+        'key': 'var(--shadow-key)',
+        'glow': 'var(--shadow-glow)',
+        'control': 'var(--shadow-control)',
       },
     },
   },
