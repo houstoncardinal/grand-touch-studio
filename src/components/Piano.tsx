@@ -80,6 +80,7 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument }: PianoProp
     return entry?.[0].toUpperCase();
   };
 
+
   const handlePress = (note: string, octave: number) => {
     const key = `${note}-${octave}`;
     setPressedKeys(prev => new Set(prev).add(key));
@@ -111,7 +112,6 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument }: PianoProp
               isPressed={pressedKeys.has(key)}
               onPress={() => handlePress(note, octave)}
               onRelease={() => handleRelease(note, octave)}
-              keyboardKey={getKeyboardKey(note, octave)}
             />
           );
         })}
@@ -120,8 +120,8 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument }: PianoProp
   };
 
   return (
-    <div className="flex items-center justify-center p-8 bg-gradient-to-b from-[hsl(var(--card))] to-[hsl(var(--background))] rounded-2xl shadow-2xl">
-      <div className="flex">
+    <div className="flex items-center justify-center p-4 sm:p-6 md:p-8 bg-gradient-to-b from-[hsl(var(--card))] to-[hsl(var(--background))] rounded-xl md:rounded-2xl shadow-2xl overflow-x-auto">
+      <div className="flex min-w-max">
         {[3 + octaveShift, 4 + octaveShift, 5 + octaveShift].map(renderOctave)}
       </div>
     </div>

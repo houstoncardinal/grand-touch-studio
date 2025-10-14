@@ -1,22 +1,50 @@
-// Audio engine for the digital piano
+// Professional audio engine for realistic piano sounds
 export type InstrumentType = 'grand-piano' | 'electric-piano' | 'synth' | 'guitar' | 'bells';
 
 interface AudioNote {
-  oscillator: OscillatorNode;
+  oscillators: OscillatorNode[];
   gainNode: GainNode;
+  filterNode?: BiquadFilterNode;
 }
 
 export class AudioEngine {
   private audioContext: AudioContext;
   private masterGain: GainNode;
+  private reverbNode: ConvolverNode;
+  private reverbGain: GainNode;
   private activeNotes: Map<string, AudioNote> = new Map();
   private currentInstrument: InstrumentType = 'grand-piano';
 
   constructor() {
     this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     this.masterGain = this.audioContext.createGain();
+    this.reverbGain = this.audioContext.createGain();
+    this.reverbNode = this.audioContext.createConvolver();
+    
+    // Create simple reverb impulse response
+    this.createReverb();
+    
+    this.reverbGain.gain.value = 0.15;
+    this.masterGain.gain.value = 0.35;
+    
+    this.reverbNode.connect(this.reverbGain);
+    this.reverbGain.connect(this.audioContext.destination);
     this.masterGain.connect(this.audioContext.destination);
-    this.masterGain.gain.value = 0.3;
+  }
+
+  private createReverb() {
+    const rate = this.audioContext.sampleRate;
+    const length = rate * 2; // 2 second reverb
+    const impulse = this.audioContext.createBuffer(2, length, rate);
+    
+    for (let channel = 0; channel < 2; channel++) {
+      const channelData = impulse.getChannelData(channel);
+      for (let i = 0; i < length; i++) {
+        channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+      }
+    }
+    
+    this.reverbNode.buffer = impulse;
   }
 
   setVolume(volume: number) {
@@ -48,26 +76,109 @@ export class AudioEngine {
   }
 
   private getInstrumentSettings(instrument: InstrumentType): {
-    waveType: OscillatorType;
+    layers: { waveType: OscillatorType; detune: number; gain: number }[];
     attack: number;
     decay: number;
     sustain: number;
     release: number;
-    detune?: number;
+    useFilter?: boolean;
+    filterFreq?: number;
+    filterQ?: number;
+    useReverb?: boolean;
   } {
     switch (instrument) {
       case 'grand-piano':
-        return { waveType: 'triangle', attack: 0.01, decay: 0.3, sustain: 0.4, release: 0.5 };
+        return {
+          layers: [
+            { waveType: 'triangle', detune: 0, gain: 0.4 },
+            { waveType: 'sine', detune: -5, gain: 0.3 },
+            { waveType: 'sine', detune: 1200, gain: 0.15 }, // Octave harmonic
+            { waveType: 'sine', detune: 1900, gain: 0.1 }, // Fifth harmonic
+          ],
+          attack: 0.008,
+          decay: 0.4,
+          sustain: 0.35,
+          release: 0.6,
+          useFilter: true,
+          filterFreq: 3000,
+          filterQ: 1,
+          useReverb: true,
+        };
       case 'electric-piano':
-        return { waveType: 'sine', attack: 0.02, decay: 0.2, sustain: 0.6, release: 0.3 };
+        return {
+          layers: [
+            { waveType: 'sine', detune: 0, gain: 0.5 },
+            { waveType: 'triangle', detune: -3, gain: 0.25 },
+            { waveType: 'sine', detune: 1203, gain: 0.15 },
+          ],
+          attack: 0.015,
+          decay: 0.3,
+          sustain: 0.5,
+          release: 0.4,
+          useFilter: true,
+          filterFreq: 2500,
+          filterQ: 0.8,
+          useReverb: true,
+        };
       case 'synth':
-        return { waveType: 'sawtooth', attack: 0.05, decay: 0.1, sustain: 0.8, release: 0.2, detune: -5 };
+        return {
+          layers: [
+            { waveType: 'sawtooth', detune: 0, gain: 0.35 },
+            { waveType: 'sawtooth', detune: -7, gain: 0.35 },
+            { waveType: 'square', detune: 1200, gain: 0.2 },
+          ],
+          attack: 0.05,
+          decay: 0.15,
+          sustain: 0.7,
+          release: 0.3,
+          useFilter: true,
+          filterFreq: 1500,
+          filterQ: 2,
+          useReverb: false,
+        };
       case 'guitar':
-        return { waveType: 'triangle', attack: 0.01, decay: 0.5, sustain: 0.3, release: 0.8 };
+        return {
+          layers: [
+            { waveType: 'triangle', detune: 0, gain: 0.4 },
+            { waveType: 'sawtooth', detune: -2, gain: 0.2 },
+            { waveType: 'sine', detune: 1200, gain: 0.15 },
+            { waveType: 'sine', detune: 2400, gain: 0.08 },
+          ],
+          attack: 0.005,
+          decay: 0.6,
+          sustain: 0.25,
+          release: 0.9,
+          useFilter: true,
+          filterFreq: 2000,
+          filterQ: 1.5,
+          useReverb: true,
+        };
       case 'bells':
-        return { waveType: 'sine', attack: 0.001, decay: 0.8, sustain: 0.2, release: 1.5 };
+        return {
+          layers: [
+            { waveType: 'sine', detune: 0, gain: 0.4 },
+            { waveType: 'sine', detune: 1200, gain: 0.25 },
+            { waveType: 'sine', detune: 1900, gain: 0.2 },
+            { waveType: 'sine', detune: 2400, gain: 0.15 },
+            { waveType: 'triangle', detune: 3600, gain: 0.1 },
+          ],
+          attack: 0.001,
+          decay: 1.2,
+          sustain: 0.15,
+          release: 2.0,
+          useFilter: true,
+          filterFreq: 4000,
+          filterQ: 0.5,
+          useReverb: true,
+        };
       default:
-        return { waveType: 'sine', attack: 0.01, decay: 0.3, sustain: 0.5, release: 0.5 };
+        return {
+          layers: [{ waveType: 'sine', detune: 0, gain: 1 }],
+          attack: 0.01,
+          decay: 0.3,
+          sustain: 0.5,
+          release: 0.5,
+        };
     }
   }
 
@@ -78,14 +189,41 @@ export class AudioEngine {
     const frequency = this.getFrequency(note, octave);
     const settings = this.getInstrumentSettings(this.currentInstrument);
 
-    const oscillator = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
-
-    oscillator.type = settings.waveType;
-    oscillator.frequency.value = frequency;
+    const oscillators: OscillatorNode[] = [];
     
-    if (settings.detune) {
-      oscillator.detune.value = settings.detune;
+    let filterNode: BiquadFilterNode | undefined;
+    
+    if (settings.useFilter) {
+      filterNode = this.audioContext.createBiquadFilter();
+      filterNode.type = 'lowpass';
+      filterNode.frequency.value = settings.filterFreq || 2000;
+      filterNode.Q.value = settings.filterQ || 1;
+    }
+
+    // Create layered oscillators for rich sound
+    settings.layers.forEach((layer) => {
+      const oscillator = this.audioContext.createOscillator();
+      const layerGain = this.audioContext.createGain();
+      
+      oscillator.type = layer.waveType;
+      oscillator.frequency.value = frequency;
+      oscillator.detune.value = layer.detune;
+      layerGain.gain.value = layer.gain;
+      
+      oscillator.connect(layerGain);
+      
+      if (filterNode) {
+        layerGain.connect(filterNode);
+      } else {
+        layerGain.connect(gainNode);
+      }
+      
+      oscillators.push(oscillator);
+    });
+    
+    if (filterNode) {
+      filterNode.connect(gainNode);
     }
 
     // ADSR Envelope
@@ -94,12 +232,15 @@ export class AudioEngine {
     gainNode.gain.linearRampToValueAtTime(1, now + settings.attack);
     gainNode.gain.linearRampToValueAtTime(settings.sustain, now + settings.attack + settings.decay);
 
-    oscillator.connect(gainNode);
     gainNode.connect(this.masterGain);
+    
+    if (settings.useReverb) {
+      gainNode.connect(this.reverbNode);
+    }
 
-    oscillator.start(now);
+    oscillators.forEach(osc => osc.start(now));
 
-    this.activeNotes.set(key, { oscillator, gainNode });
+    this.activeNotes.set(key, { oscillators, gainNode, filterNode });
   }
 
   stopNote(note: string, octave: number) {
@@ -115,7 +256,7 @@ export class AudioEngine {
     activeNote.gainNode.gain.setValueAtTime(activeNote.gainNode.gain.value, now);
     activeNote.gainNode.gain.linearRampToValueAtTime(0, now + settings.release);
 
-    activeNote.oscillator.stop(now + settings.release);
+    activeNote.oscillators.forEach(osc => osc.stop(now + settings.release));
     this.activeNotes.delete(key);
   }
 
@@ -126,3 +267,4 @@ export class AudioEngine {
     });
   }
 }
+
