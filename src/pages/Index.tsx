@@ -15,19 +15,29 @@ const Index = () => {
   }, [volume, audioEngine]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-3 sm:p-4 md:p-8 bg-gradient-to-br from-background via-background to-card">
-      <div className="w-full max-w-7xl space-y-6 sm:space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center p-3 sm:p-4 md:p-8 relative overflow-hidden">
+      {/* Ambient background orbs */}
+      <div className="absolute top-20 left-20 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-accent/20 rounded-full blur-[120px] animate-pulse delay-1000" />
+      
+      <div className="w-full max-w-7xl space-y-6 sm:space-y-8 relative z-10">
         <header className="text-center space-y-3 sm:space-y-4">
           <div className="flex items-center justify-center gap-3 sm:gap-4">
-            <div className="p-3 sm:p-4 bg-gradient-to-br from-primary to-accent rounded-xl sm:rounded-2xl shadow-glow animate-glow-pulse">
-              <Music className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white" />
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl sm:rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity" />
+              <div className="relative p-3 sm:p-4 bg-gradient-to-br from-primary to-accent rounded-xl sm:rounded-2xl shadow-glow">
+                <Music className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white drop-shadow-lg" />
+              </div>
             </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent px-4">
-            Digital Piano Studio
-          </h1>
-          <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-            Professional-grade digital piano with realistic sounds. Play with your keyboard or touch!
+          <div className="space-y-2">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-white via-primary to-accent bg-clip-text text-transparent px-4 drop-shadow-2xl">
+              Digital Piano Studio
+            </h1>
+            <div className="h-1 w-24 mx-auto bg-gradient-to-r from-primary via-accent to-primary rounded-full" />
+          </div>
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground/90 max-w-2xl mx-auto px-4 font-medium">
+            Experience professional-grade sound with stunning visual fidelity
           </p>
         </header>
 
@@ -47,9 +57,13 @@ const Index = () => {
             currentInstrument={currentInstrument}
           />
 
-          <div className="text-center text-xs sm:text-sm text-muted-foreground space-y-1 sm:space-y-2 px-4">
-            <p className="hidden sm:block">💡 Use your keyboard to play: A-L keys for notes</p>
-            <p className="sm:text-xs">Touch the keys to play beautiful music 🎵</p>
+          <div className="text-center text-xs sm:text-sm text-muted-foreground/70 space-y-1 sm:space-y-2 px-4">
+            <p className="hidden sm:block font-medium">
+              🎹 <span className="text-primary/80">Keyboard shortcuts:</span> A-L keys for notes
+            </p>
+            <p className="sm:text-xs font-medium">
+              ✨ Touch the keys to create beautiful music
+            </p>
           </div>
         </div>
       </div>
@@ -58,4 +72,5 @@ const Index = () => {
 };
 
 export default Index;
+
 

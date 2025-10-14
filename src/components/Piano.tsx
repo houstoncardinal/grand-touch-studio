@@ -120,9 +120,27 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument }: PianoProp
   };
 
   return (
-    <div className="flex items-center justify-center p-4 sm:p-6 md:p-8 bg-gradient-to-b from-[hsl(var(--card))] to-[hsl(var(--background))] rounded-xl md:rounded-2xl shadow-2xl overflow-x-auto">
-      <div className="flex min-w-max">
-        {[3 + octaveShift, 4 + octaveShift, 5 + octaveShift].map(renderOctave)}
+    <div className="relative">
+      {/* Premium piano body with 3D depth */}
+      <div className="relative glass-panel p-4 sm:p-6 md:p-8 rounded-2xl md:rounded-3xl overflow-x-auto">
+        {/* Ambient glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-accent/5 rounded-2xl md:rounded-3xl pointer-events-none" />
+        
+        {/* Top panel shine */}
+        <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/5 to-transparent rounded-t-2xl md:rounded-t-3xl pointer-events-none" />
+        
+        {/* Piano keyboard */}
+        <div className="relative flex min-w-max">
+          {[3 + octaveShift, 4 + octaveShift, 5 + octaveShift].map(renderOctave)}
+        </div>
+        
+        {/* Bottom shadow for depth */}
+        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/20 to-transparent rounded-b-2xl md:rounded-b-3xl pointer-events-none" />
+      </div>
+      
+      {/* Outer glow for premium feel */}
+      <div className="absolute inset-0 -z-10 blur-3xl opacity-30">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-accent/20 to-primary/30 rounded-3xl" />
       </div>
     </div>
   );
