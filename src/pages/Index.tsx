@@ -34,10 +34,13 @@ const Index = () => {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-white via-primary to-accent bg-clip-text text-transparent px-4 drop-shadow-2xl">
               Digital Piano Studio
             </h1>
-            <div className="h-1 w-24 mx-auto bg-gradient-to-r from-primary via-accent to-primary rounded-full" />
+            <p className="font-serif text-lg sm:text-xl md:text-2xl tracking-[0.15em] bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200 bg-clip-text text-transparent italic">
+              by Siraj Qureshi
+            </p>
+            <div className="h-0.5 w-32 mx-auto bg-gradient-to-r from-transparent via-amber-300/50 to-transparent rounded-full" />
           </div>
           <p className="text-sm sm:text-base md:text-lg text-muted-foreground/90 max-w-2xl mx-auto px-4 font-medium">
-            Experience professional-grade sound with stunning visual fidelity
+            Experience ultra-luxury professional-grade sound with stunning visual fidelity
           </p>
         </header>
 

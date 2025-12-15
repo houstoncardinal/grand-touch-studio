@@ -129,9 +129,27 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument }: PianoProp
         {/* Top panel shine */}
         <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/5 to-transparent rounded-t-2xl md:rounded-t-3xl pointer-events-none" />
         
+        {/* Signature branding plate */}
+        <div className="absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 z-10">
+          <div className="relative px-4 sm:px-6 py-1 sm:py-1.5 bg-gradient-to-b from-amber-200/20 via-amber-100/10 to-amber-200/20 rounded-full border border-amber-300/30 backdrop-blur-sm">
+            {/* Gold shine effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/20 to-transparent rounded-full" />
+            <p className="relative font-serif text-xs sm:text-sm tracking-[0.2em] text-amber-200/90 italic">
+              Siraj Qureshi
+            </p>
+          </div>
+        </div>
+        
         {/* Piano keyboard */}
-        <div className="relative flex min-w-max">
+        <div className="relative flex min-w-max mt-6 sm:mt-8">
           {[3 + octaveShift, 4 + octaveShift, 5 + octaveShift].map(renderOctave)}
+        </div>
+        
+        {/* Signature engraving on the right */}
+        <div className="absolute bottom-2 sm:bottom-3 right-3 sm:right-4 z-10">
+          <p className="font-serif text-[10px] sm:text-xs tracking-widest text-amber-300/40 uppercase">
+            Est. 2024
+          </p>
         </div>
         
         {/* Bottom shadow for depth */}
