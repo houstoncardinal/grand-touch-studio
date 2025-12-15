@@ -1,89 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Ultra-Luxury Piano Design System */
 
 @layer base {
   :root {
-    --background: 220 20% 8%;
+    --background: 225 25% 4%;
     --foreground: 0 0% 98%;
 
-    --card: 220 18% 12%;
+    --card: 225 22% 8%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 220 18% 10%;
+    --popover: 225 22% 6%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 280 65% 55%;
+    --primary: 275 80% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 20%;
+    --secondary: 225 18% 14%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 12% 18%;
-    --muted-foreground: 220 8% 60%;
+    --muted: 225 15% 18%;
+    --muted-foreground: 225 10% 55%;
 
-    --accent: 190 85% 45%;
+    --accent: 185 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 15% 22%;
-    --input: 220 15% 18%;
-    --ring: 280 65% 55%;
+    --border: 225 18% 18%;
+    --input: 225 18% 14%;
+    --ring: 275 80% 60%;
 
     --radius: 0.75rem;
 
-    /* Premium Piano Colors */
-    --white-key: 0 0% 98%;
-    --white-key-shine: 0 0% 100%;
-    --white-key-shadow: 220 15% 10%;
-    --black-key: 220 25% 6%;
-    --black-key-shine: 220 20% 12%;
-    --black-key-shadow: 220 30% 3%;
-    --key-active: 280 65% 55%;
-    --key-glow: 280 70% 60%;
+    /* Ultra-Luxury Piano Colors */
+    --white-key: 45 30% 96%;
+    --white-key-shine: 45 40% 99%;
+    --white-key-shadow: 225 20% 6%;
+    --black-key: 225 30% 4%;
+    --black-key-shine: 225 25% 12%;
+    --black-key-shadow: 225 35% 2%;
+    --key-active: 275 80% 60%;
+    --key-glow: 275 90% 65%;
     
-    /* Premium Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(280 65% 55%), hsl(260 70% 50%), hsl(240 75% 55%));
-    --gradient-accent: linear-gradient(135deg, hsl(190 85% 45%), hsl(200 90% 50%));
-    --gradient-glass: linear-gradient(135deg, hsl(220 18% 12% / 0.9), hsl(220 20% 15% / 0.7));
-    --gradient-key-white: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 98%) 40%, hsl(220 10% 88%) 100%);
-    --gradient-key-black: linear-gradient(180deg, hsl(220 20% 12%) 0%, hsl(220 25% 6%) 50%, hsl(220 30% 3%) 100%);
-    --gradient-glow: radial-gradient(circle at 50% 0%, hsl(280 70% 60% / 0.4), transparent 70%);
-    --gradient-shine: linear-gradient(180deg, hsl(0 0% 100% / 0.3) 0%, transparent 30%);
+    /* Premium Luxury Gradients */
+    --gradient-luxury: linear-gradient(135deg, hsl(275 80% 60%), hsl(255 85% 55%), hsl(235 90% 60%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 100% 70%), hsl(35 100% 60%), hsl(45 100% 75%));
+    --gradient-glass: linear-gradient(135deg, hsl(225 22% 10% / 0.95), hsl(225 25% 15% / 0.85));
+    --gradient-key-white: linear-gradient(180deg, 
+      hsl(45 40% 99%) 0%, 
+      hsl(45 30% 96%) 20%,
+      hsl(45 20% 92%) 60%,
+      hsl(45 15% 85%) 100%);
+    --gradient-key-black: linear-gradient(180deg, 
+      hsl(225 25% 15%) 0%, 
+      hsl(225 30% 6%) 30%,
+      hsl(225 35% 3%) 70%,
+      hsl(225 40% 2%) 100%);
+    --gradient-glow: radial-gradient(circle at 50% 0%, hsl(275 90% 65% / 0.5), transparent 70%);
+    --gradient-shine: linear-gradient(180deg, hsl(0 0% 100% / 0.4) 0%, transparent 30%);
+    --gradient-3d-white: linear-gradient(90deg, 
+      hsl(45 10% 80%) 0%, 
+      hsl(45 30% 96%) 15%, 
+      hsl(45 40% 99%) 50%, 
+      hsl(45 30% 96%) 85%, 
+      hsl(45 10% 80%) 100%);
+    --gradient-3d-black: linear-gradient(90deg, 
+      hsl(225 40% 2%) 0%, 
+      hsl(225 25% 12%) 30%, 
+      hsl(225 25% 15%) 50%, 
+      hsl(225 25% 12%) 70%, 
+      hsl(225 40% 2%) 100%);
     
-    /* Premium Shadows & Effects */
-    --shadow-key-white: 0 8px 16px hsl(220 30% 3% / 0.4), 
-                        0 2px 4px hsl(220 30% 3% / 0.3),
-                        inset 0 -2px 4px hsl(220 10% 85%);
-    --shadow-key-black: 0 6px 12px hsl(220 30% 2% / 0.6), 
-                        0 2px 4px hsl(220 30% 1% / 0.4),
-                        inset 0 1px 2px hsl(220 20% 15%);
-    --shadow-glow: 0 0 40px hsl(280 70% 60% / 0.6),
-                   0 0 20px hsl(280 70% 60% / 0.4);
-    --shadow-glass: 0 8px 32px hsl(220 30% 3% / 0.4),
-                    0 4px 16px hsl(220 30% 3% / 0.2),
-                    inset 0 1px 0 hsl(0 0% 100% / 0.1);
-    --shadow-control: 0 4px 16px hsl(220 30% 3% / 0.3);
+    /* Premium Shadows & 3D Effects */
+    --shadow-key-white: 
+      0 15px 35px hsl(225 35% 2% / 0.5), 
+      0 5px 15px hsl(225 35% 2% / 0.4),
+      0 2px 5px hsl(225 35% 2% / 0.3),
+      inset 0 -3px 8px hsl(45 15% 75%),
+      inset 2px 0 4px hsl(45 10% 85%),
+      inset -2px 0 4px hsl(45 10% 85%);
+    --shadow-key-black: 
+      0 12px 25px hsl(225 40% 1% / 0.7), 
+      0 4px 12px hsl(225 40% 1% / 0.5),
+      inset 0 2px 4px hsl(225 20% 20%),
+      inset 0 -2px 6px hsl(225 40% 1%);
+    --shadow-glow: 
+      0 0 60px hsl(275 90% 65% / 0.7),
+      0 0 30px hsl(275 90% 65% / 0.5),
+      0 0 15px hsl(275 90% 65% / 0.3);
+    --shadow-glass: 
+      0 12px 48px hsl(225 35% 2% / 0.5),
+      0 6px 24px hsl(225 35% 2% / 0.3),
+      inset 0 1px 0 hsl(0 0% 100% / 0.1),
+      inset 0 -1px 0 hsl(225 35% 2% / 0.3);
+    --shadow-luxury: 
+      0 20px 60px hsl(275 80% 30% / 0.3),
+      0 8px 24px hsl(225 35% 2% / 0.4);
     
     /* Animations */
     --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-key: all 0.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-key: all 0.08s cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-glass: backdrop-filter 0.3s ease;
 
-    --sidebar-background: 220 18% 10%;
+    --sidebar-background: 225 22% 6%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 280 65% 55%;
+    --sidebar-primary: 275 80% 60%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 220 15% 20%;
+    --sidebar-accent: 225 18% 14%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 220 15% 22%;
-    --sidebar-ring: 280 65% 55%;
+    --sidebar-border: 225 18% 18%;
+    --sidebar-ring: 275 80% 60%;
   }
 }
 
@@ -94,15 +126,22 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(circle at 20% 50%, hsl(280 65% 15% / 0.15) 0%, transparent 50%),
-                      radial-gradient(circle at 80% 80%, hsl(190 85% 20% / 0.1) 0%, transparent 50%);
+    background-image: 
+      radial-gradient(circle at 15% 25%, hsl(275 80% 12% / 0.2) 0%, transparent 40%),
+      radial-gradient(circle at 85% 75%, hsl(185 100% 15% / 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, hsl(225 25% 6%) 0%, hsl(225 25% 2%) 100%);
   }
 }
 
 @layer utilities {
   .glass-panel {
-    @apply bg-card/40 backdrop-blur-xl border border-white/10;
+    @apply bg-card/50 backdrop-blur-2xl border border-white/[0.08];
     box-shadow: var(--shadow-glass);
+  }
+  
+  .glass-ultra {
+    @apply bg-card/30 backdrop-blur-3xl border border-white/[0.05];
+    box-shadow: var(--shadow-luxury);
   }
   
   .key-white-gradient {
@@ -113,8 +152,69 @@ All colors MUST be HSL.
     background: var(--gradient-key-black);
   }
   
+  .key-3d-white {
+    background: var(--gradient-3d-white);
+  }
+  
+  .key-3d-black {
+    background: var(--gradient-3d-black);
+  }
+  
   .glow-effect {
     box-shadow: var(--shadow-glow);
+  }
+  
+  .luxury-glow {
+    box-shadow: var(--shadow-luxury);
+  }
+  
+  .text-luxury {
+    background: var(--gradient-luxury);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  /* Futuristic scanning line animation */
+  @keyframes scan {
+    0% { transform: translateY(-100%); opacity: 0; }
+    50% { opacity: 0.5; }
+    100% { transform: translateY(100%); opacity: 0; }
+  }
+  
+  .animate-scan {
+    animation: scan 3s ease-in-out infinite;
+  }
+  
+  /* Pulse glow animation */
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  /* Ambient float animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
   }
 }
 

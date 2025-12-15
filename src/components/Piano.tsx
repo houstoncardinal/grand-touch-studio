@@ -25,9 +25,10 @@ interface PianoProps {
   audioEngine: AudioEngine;
   octaveShift: number;
   currentInstrument: InstrumentType;
+  highlightedNotes?: string[];
 }
 
-export const Piano = ({ audioEngine, octaveShift, currentInstrument }: PianoProps) => {
+export const Piano = ({ audioEngine, octaveShift, currentInstrument, highlightedNotes = [] }: PianoProps) => {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -73,14 +74,6 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument }: PianoProp
     };
   }, [audioEngine, octaveShift, pressedKeys]);
 
-  const getKeyboardKey = (note: string, octave: number): string | undefined => {
-    const entry = Object.entries(KEYBOARD_MAP).find(
-      ([_, mapping]) => mapping.note === note && mapping.octave === octave - octaveShift
-    );
-    return entry?.[0].toUpperCase();
-  };
-
-
   const handlePress = (note: string, octave: number) => {
     const key = `${note}-${octave}`;
     setPressedKeys(prev => new Set(prev).add(key));
@@ -103,6 +96,7 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument }: PianoProp
         {NOTES.map((note) => {
           const isBlack = note.includes('#');
           const key = `${note}-${octave}`;
+          const isHighlighted = highlightedNotes.includes(note);
           return (
             <PianoKey
               key={key}
@@ -110,6 +104,7 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument }: PianoProp
               octave={octave}
               isBlack={isBlack}
               isPressed={pressedKeys.has(key)}
+              isHighlighted={isHighlighted}
               onPress={() => handlePress(note, octave)}
               onRelease={() => handleRelease(note, octave)}
             />
@@ -121,45 +116,66 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument }: PianoProp
 
   return (
     <div className="relative">
+      {/* Futuristic outer frame */}
+      <div className="absolute -inset-3 sm:-inset-4 md:-inset-6 rounded-3xl md:rounded-[2rem] bg-gradient-to-b from-[hsl(225,25%,12%)] via-[hsl(225,28%,8%)] to-[hsl(225,30%,5%)] border border-white/[0.05]" />
+      
+      {/* Inner glow ring */}
+      <div className="absolute -inset-1.5 sm:-inset-2 md:-inset-3 rounded-2xl md:rounded-3xl bg-gradient-to-b from-primary/10 via-transparent to-accent/10 blur-sm" />
+      
       {/* Premium piano body with 3D depth */}
-      <div className="relative glass-panel p-4 sm:p-6 md:p-8 rounded-2xl md:rounded-3xl overflow-x-auto">
-        {/* Ambient glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-accent/5 rounded-2xl md:rounded-3xl pointer-events-none" />
+      <div className="relative glass-ultra p-3 sm:p-4 md:p-6 rounded-2xl md:rounded-3xl overflow-x-auto">
+        {/* Scanning line effect */}
+        <div className="absolute inset-0 overflow-hidden rounded-2xl md:rounded-3xl pointer-events-none">
+          <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent animate-scan" />
+        </div>
         
-        {/* Top panel shine */}
-        <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/5 to-transparent rounded-t-2xl md:rounded-t-3xl pointer-events-none" />
+        {/* Top panel holographic shine */}
+        <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.03] via-transparent to-transparent rounded-t-2xl md:rounded-t-3xl pointer-events-none" />
         
-        {/* Signature branding plate */}
-        <div className="absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 z-10">
-          <div className="relative px-4 sm:px-6 py-1 sm:py-1.5 bg-gradient-to-b from-amber-200/20 via-amber-100/10 to-amber-200/20 rounded-full border border-amber-300/30 backdrop-blur-sm">
+        {/* Signature branding plate - Ultra luxury gold */}
+        <div className="absolute top-1.5 sm:top-2 md:top-3 left-1/2 -translate-x-1/2 z-10">
+          <div className="relative px-4 sm:px-6 md:px-8 py-1 sm:py-1.5 bg-gradient-to-b from-amber-300/20 via-amber-200/10 to-amber-300/20 rounded-full border border-amber-400/40 backdrop-blur-md">
             {/* Gold shine effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/20 to-transparent rounded-full" />
-            <p className="relative font-serif text-xs sm:text-sm tracking-[0.2em] text-amber-200/90 italic">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/30 to-transparent rounded-full animate-pulse-glow" />
+            <p className="relative font-serif text-[10px] sm:text-xs md:text-sm tracking-[0.15em] sm:tracking-[0.2em] text-gold italic font-medium">
               Siraj Qureshi
             </p>
           </div>
         </div>
         
-        {/* Piano keyboard */}
-        <div className="relative flex min-w-max mt-6 sm:mt-8">
-          {[3 + octaveShift, 4 + octaveShift, 5 + octaveShift].map(renderOctave)}
+        {/* Piano keyboard container */}
+        <div className="relative mt-6 sm:mt-8 md:mt-10">
+          {/* Keyboard base with wood grain effect */}
+          <div className="absolute -inset-x-1 -bottom-2 h-4 bg-gradient-to-b from-[hsl(25,30%,15%)] to-[hsl(25,35%,10%)] rounded-b-xl" />
+          
+          {/* Keys */}
+          <div className="relative flex min-w-max px-1">
+            {[3 + octaveShift, 4 + octaveShift, 5 + octaveShift].map(renderOctave)}
+          </div>
         </div>
         
-        {/* Signature engraving on the right */}
-        <div className="absolute bottom-2 sm:bottom-3 right-3 sm:right-4 z-10">
-          <p className="font-serif text-[10px] sm:text-xs tracking-widest text-amber-300/40 uppercase">
+        {/* Signature engraving - bottom right */}
+        <div className="absolute bottom-1.5 sm:bottom-2 md:bottom-3 right-2 sm:right-3 md:right-4 z-10">
+          <p className="font-serif text-[8px] sm:text-[9px] md:text-[10px] tracking-[0.15em] text-amber-400/50 uppercase">
             Est. 2024
           </p>
         </div>
         
+        {/* Side ambient glows */}
+        <div className="absolute left-0 inset-y-0 w-8 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
+        <div className="absolute right-0 inset-y-0 w-8 bg-gradient-to-l from-accent/5 to-transparent pointer-events-none" />
+        
         {/* Bottom shadow for depth */}
-        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/20 to-transparent rounded-b-2xl md:rounded-b-3xl pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent rounded-b-2xl md:rounded-b-3xl pointer-events-none" />
       </div>
       
       {/* Outer glow for premium feel */}
-      <div className="absolute inset-0 -z-10 blur-3xl opacity-30">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-accent/20 to-primary/30 rounded-3xl" />
+      <div className="absolute inset-0 -z-10 blur-3xl opacity-40">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/40 via-accent/30 to-primary/40 rounded-3xl animate-pulse-glow" />
       </div>
+      
+      {/* Floor reflection */}
+      <div className="absolute -bottom-8 inset-x-4 h-8 bg-gradient-to-b from-primary/10 to-transparent blur-xl opacity-50 rounded-full" />
     </div>
   );
 };
