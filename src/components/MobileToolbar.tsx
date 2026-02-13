@@ -1,7 +1,7 @@
-import { Music, GraduationCap, Settings, Globe, Home } from "lucide-react";
+import { Music, GraduationCap, Settings, Globe, Home, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Mode = 'play' | 'learn' | 'settings';
+type Mode = 'play' | 'learn' | 'settings' | 'pricing';
 
 interface MobileToolbarProps {
   currentMode: Mode;
@@ -13,6 +13,7 @@ export const MobileToolbar = ({ currentMode, onModeChange, onLanguageClick }: Mo
   const items = [
     { mode: 'play' as Mode, icon: Music, label: 'Play' },
     { mode: 'learn' as Mode, icon: GraduationCap, label: 'Learn' },
+    { mode: 'pricing' as Mode, icon: Crown, label: 'Premium' },
     { mode: 'settings' as Mode, icon: Settings, label: 'Settings' },
   ];
 
