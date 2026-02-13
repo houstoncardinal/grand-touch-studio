@@ -4,12 +4,14 @@ import { Controls } from "@/components/Controls";
 import { MobileToolbar } from "@/components/MobileToolbar";
 import { LearnMode } from "@/components/LearnMode";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { PricingSection } from "@/components/PricingSection";
+import { SEOHead, WebAppSchema } from "@/components/SEOHead";
 import { AudioEngine, InstrumentType } from "@/lib/audio";
 import { getTranslation } from "@/lib/i18n";
-import { Music, Globe, Keyboard } from "lucide-react";
+import { Music, Globe, Keyboard, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type Mode = 'play' | 'learn' | 'settings';
+type Mode = 'play' | 'learn' | 'settings' | 'pricing';
 
 const Index = () => {
   const [audioEngine] = useState(() => new AudioEngine());
@@ -34,6 +36,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-3 sm:p-4 md:p-8 pb-20 md:pb-8 relative overflow-hidden">
+      <SEOHead />
+      <WebAppSchema />
       {/* Futuristic ambient background */}
       <div className="fixed inset-0 pointer-events-none">
         {/* Primary orb */}
@@ -97,7 +101,7 @@ const Index = () => {
 
         {/* Mode tabs - Desktop only */}
         <div className="hidden md:flex justify-center gap-2">
-          {(['play', 'learn'] as Mode[]).map((mode) => (
+          {(['play', 'learn', 'pricing'] as Mode[]).map((mode) => (
             <Button
               key={mode}
               variant={currentMode === mode ? 'default' : 'ghost'}
@@ -106,7 +110,8 @@ const Index = () => {
             >
               {mode === 'play' && <Keyboard className="w-4 h-4 mr-2" />}
               {mode === 'learn' && <Music className="w-4 h-4 mr-2" />}
-              {t(mode)}
+              {mode === 'pricing' && <Crown className="w-4 h-4 mr-2" />}
+              {mode === 'pricing' ? 'Premium' : t(mode as 'play' | 'learn')}
             </Button>
           ))}
         </div>
@@ -139,15 +144,22 @@ const Index = () => {
             />
           )}
 
+          {/* Pricing */}
+          {currentMode === 'pricing' && (
+            <PricingSection language={language} />
+          )}
+
           {/* Tips */}
-          <div className="text-center text-[10px] sm:text-xs md:text-sm text-muted-foreground/60 space-y-1 px-4">
-            <p className="hidden sm:block font-medium">
-              <span className="text-primary/70">🎹 {t('keyboardTip')}</span>
-            </p>
-            <p className="font-medium">
-              ✨ {t('touchTip')}
-            </p>
-          </div>
+          {(currentMode === 'play' || currentMode === 'learn') && (
+            <div className="text-center text-[10px] sm:text-xs md:text-sm text-muted-foreground/60 space-y-1 px-4">
+              <p className="hidden sm:block font-medium">
+                <span className="text-primary/70">🎹 {t('keyboardTip')}</span>
+              </p>
+              <p className="font-medium">
+                ✨ {t('touchTip')}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
