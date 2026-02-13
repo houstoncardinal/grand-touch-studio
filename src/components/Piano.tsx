@@ -26,9 +26,11 @@ interface PianoProps {
   octaveShift: number;
   currentInstrument: InstrumentType;
   highlightedNotes?: string[];
+  onNoteOn?: (note: string, octave: number) => void;
+  onNoteOff?: (note: string, octave: number) => void;
 }
 
-export const Piano = ({ audioEngine, octaveShift, currentInstrument, highlightedNotes = [] }: PianoProps) => {
+export const Piano = ({ audioEngine, octaveShift, currentInstrument, highlightedNotes = [], onNoteOn, onNoteOff }: PianoProps) => {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -47,6 +49,7 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument, highlighted
       if (!pressedKeys.has(key)) {
         setPressedKeys(prev => new Set(prev).add(key));
         audioEngine.playNote(mapping.note, adjustedOctave);
+        onNoteOn?.(mapping.note, adjustedOctave);
       }
     };
 
@@ -63,6 +66,7 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument, highlighted
         return newSet;
       });
       audioEngine.stopNote(mapping.note, adjustedOctave);
+      onNoteOff?.(mapping.note, adjustedOctave);
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -78,6 +82,7 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument, highlighted
     const key = `${note}-${octave}`;
     setPressedKeys(prev => new Set(prev).add(key));
     audioEngine.playNote(note, octave);
+    onNoteOn?.(note, octave);
   };
 
   const handleRelease = (note: string, octave: number) => {
@@ -88,6 +93,7 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument, highlighted
       return newSet;
     });
     audioEngine.stopNote(note, octave);
+    onNoteOff?.(note, octave);
   };
 
   const renderOctave = (octave: number) => {

@@ -1,10 +1,22 @@
 import { Check, Crown, Sparkles, Star, Zap } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 interface PricingSectionProps {
   language: string;
 }
+
+// TODO: Replace these with your actual Stripe price IDs from the Stripe Dashboard
+const PRICE_IDS = {
+  monthly: "price_MONTHLY_PLACEHOLDER",
+  yearly: "price_YEARLY_PLACEHOLDER",
+};
 
 const plans = [
   {
@@ -28,6 +40,7 @@ const plans = [
     cta: "Current Plan",
     popular: false,
     gradient: "from-secondary/80 to-secondary/40",
+    priceId: null,
   },
   {
     name: "Premium",
@@ -47,6 +60,7 @@ const plans = [
     cta: "Upgrade to Premium",
     popular: true,
     gradient: "from-primary to-accent",
+    priceId: PRICE_IDS.monthly,
   },
   {
     name: "Yearly",
@@ -64,17 +78,73 @@ const plans = [
     cta: "Get Yearly Plan",
     popular: false,
     gradient: "from-amber-500 to-amber-600",
+    priceId: PRICE_IDS.yearly,
   },
 ];
 
 export const PricingSection = ({ language }: PricingSectionProps) => {
+  const { user, subscription, session } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleSubscribe = async (priceId: string | null, planName: string) => {
+    if (!priceId) return;
+
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+
+    if (priceId.includes("PLACEHOLDER")) {
+      toast({
+        title: "Coming Soon",
+        description: "Premium subscriptions will be available once Stripe products are configured. Please create products in your Stripe Dashboard and update the price IDs.",
+      });
+      return;
+    }
+
+    setLoadingPlan(planName);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal", {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
   return (
     <section id="pricing" className="w-full" aria-label="Pricing Plans">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4"
+        >
           <Sparkles className="w-4 h-4 text-primary" />
           <span className="text-sm font-semibold text-primary">Premium Features</span>
-        </div>
+        </motion.div>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground mb-2">
           Unlock Your Full Potential
         </h2>
@@ -84,9 +154,12 @@ export const PricingSection = ({ language }: PricingSectionProps) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
-        {plans.map((plan) => (
-          <div
+        {plans.map((plan, i) => (
+          <motion.div
             key={plan.name}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
             className={cn(
               "relative glass-panel rounded-2xl p-6 flex flex-col transition-all duration-300",
               plan.popular
@@ -132,30 +205,40 @@ export const PricingSection = ({ language }: PricingSectionProps) => {
               ))}
             </ul>
 
-            <Button
-              className={cn(
-                "w-full font-bold",
-                plan.popular
-                  ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg"
-                  : plan.name === "Yearly"
-                  ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:opacity-90 text-white"
-                  : "bg-secondary/50 hover:bg-secondary/70 text-foreground"
-              )}
-              size="lg"
-              onClick={() => {
-                // Will be connected to Stripe later
-                if (plan.name !== "Free") {
-                  alert("Premium subscriptions coming soon! Stay tuned.");
-                }
-              }}
-            >
-              {plan.cta}
-            </Button>
-          </div>
+            {subscription.subscribed && plan.name !== "Free" ? (
+              <Button
+                onClick={handleManageSubscription}
+                variant="outline"
+                className="w-full border-primary/30 text-primary hover:bg-primary/10"
+                size="lg"
+              >
+                Manage Subscription
+              </Button>
+            ) : (
+              <Button
+                className={cn(
+                  "w-full font-bold",
+                  plan.popular
+                    ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg"
+                    : plan.name === "Yearly"
+                    ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:opacity-90 text-white"
+                    : "bg-secondary/50 hover:bg-secondary/70 text-foreground"
+                )}
+                size="lg"
+                disabled={plan.name === "Free" || loadingPlan === plan.name}
+                onClick={() => handleSubscribe(plan.priceId, plan.name)}
+              >
+                {loadingPlan === plan.name ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  plan.cta
+                )}
+              </Button>
+            )}
+          </motion.div>
         ))}
       </div>
 
-      {/* Trust badges */}
       <div className="flex flex-wrap items-center justify-center gap-4 mt-8 text-xs text-muted-foreground/60">
         <span>🔒 Secure payment</span>
         <span>•</span>
