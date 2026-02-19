@@ -19,12 +19,27 @@ interface ControlsProps {
   onInstrumentChange: (instrument: InstrumentType) => void;
 }
 
-const INSTRUMENTS: { value: InstrumentType; label: string }[] = [
-  { value: 'grand-piano', label: '🎹 Grand Piano' },
-  { value: 'electric-piano', label: '🎹 Electric Piano' },
-  { value: 'synth', label: '🎛️ Synthesizer' },
-  { value: 'guitar', label: '🎸 Guitar' },
-  { value: 'bells', label: '🔔 Bells' },
+const INSTRUMENTS: { value: InstrumentType; label: string; category: string }[] = [
+  // Keys
+  { value: 'grand-piano', label: '🎹 Grand Piano', category: 'Keys' },
+  { value: 'electric-piano', label: '⚡ Electric Piano', category: 'Keys' },
+  { value: 'clavinet', label: '🎹 Clavinet', category: 'Keys' },
+  { value: 'celesta', label: '✨ Celesta', category: 'Keys' },
+  // Organ & Accordion
+  { value: 'organ', label: '🎶 Pipe Organ', category: 'Organ' },
+  { value: 'accordion', label: '🪗 Accordion', category: 'Organ' },
+  // Strings
+  { value: 'strings', label: '🎻 String Ensemble', category: 'Strings' },
+  { value: 'harp', label: '🎵 Concert Harp', category: 'Strings' },
+  { value: 'guitar', label: '🎸 Acoustic Guitar', category: 'Strings' },
+  // Wind & Brass
+  { value: 'flute', label: '🎼 Concert Flute', category: 'Wind' },
+  { value: 'brass', label: '🎺 Brass Section', category: 'Brass' },
+  // Percussion
+  { value: 'marimba', label: '🥁 Marimba', category: 'Percussion' },
+  { value: 'bells', label: '🔔 Tubular Bells', category: 'Percussion' },
+  // Synth
+  { value: 'synth', label: '🎛️ Analog Synth', category: 'Synth' },
 ];
 
 export const Controls = ({
@@ -41,7 +56,7 @@ export const Controls = ({
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
       
       <div className="relative z-10 space-y-4">
-        {/* Instrument Selection - Full width on mobile */}
+        {/* Instrument Selection */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full">
           <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap flex items-center gap-2">
             <span className="w-1 h-4 bg-gradient-to-b from-primary to-accent rounded-full" />
@@ -51,16 +66,26 @@ export const Controls = ({
             <SelectTrigger className="w-full sm:flex-1 bg-secondary/50 backdrop-blur-sm border-white/10 hover:bg-secondary/70 transition-all">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="glass-panel border-white/10">
-              {INSTRUMENTS.map((instrument) => (
-                <SelectItem 
-                  key={instrument.value} 
-                  value={instrument.value}
-                  className="hover:bg-primary/20 focus:bg-primary/20"
-                >
-                  {instrument.label}
-                </SelectItem>
-              ))}
+            <SelectContent className="glass-panel border-white/10 max-h-[320px]">
+              {INSTRUMENTS.map((instrument, i) => {
+                const prevCategory = i > 0 ? INSTRUMENTS[i - 1].category : null;
+                const showDivider = prevCategory !== null && prevCategory !== instrument.category;
+                return (
+                  <div key={instrument.value}>
+                    {showDivider && (
+                      <div className="px-2 py-1.5">
+                        <div className="h-px bg-white/10" />
+                      </div>
+                    )}
+                    <SelectItem
+                      value={instrument.value}
+                      className="hover:bg-primary/20 focus:bg-primary/20"
+                    >
+                      {instrument.label}
+                    </SelectItem>
+                  </div>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
