@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { PianoKey } from "./PianoKey";
 import { AudioEngine, InstrumentType } from "@/lib/audio";
 import { useMidi } from "@/hooks/use-midi";
@@ -34,79 +34,72 @@ interface PianoProps {
 
 export const Piano = ({ audioEngine, octaveShift, currentInstrument, highlightedNotes = [], onNoteOn, onNoteOff }: PianoProps) => {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
+  const pressedKeysRef = useRef<Set<string>>(new Set());
 
-  // MIDI controller support
+  // Stable refs for callbacks to avoid re-binds
+  const onNoteOnRef = useRef(onNoteOn);
+  const onNoteOffRef = useRef(onNoteOff);
+  onNoteOnRef.current = onNoteOn;
+  onNoteOffRef.current = onNoteOff;
+
+  const handlePress = useCallback((note: string, octave: number) => {
+    const key = `${note}-${octave}`;
+    if (pressedKeysRef.current.has(key)) return;
+    pressedKeysRef.current = new Set(pressedKeysRef.current).add(key);
+    setPressedKeys(pressedKeysRef.current);
+    audioEngine.playNote(note, octave);
+    onNoteOnRef.current?.(note, octave);
+  }, [audioEngine]);
+
+  const handleRelease = useCallback((note: string, octave: number) => {
+    const key = `${note}-${octave}`;
+    if (!pressedKeysRef.current.has(key)) return;
+    const next = new Set(pressedKeysRef.current);
+    next.delete(key);
+    pressedKeysRef.current = next;
+    setPressedKeys(next);
+    audioEngine.stopNote(note, octave);
+    onNoteOffRef.current?.(note, octave);
+  }, [audioEngine]);
+
+  // MIDI controller support — callbacks are stable via useCallback
   const { devices: midiDevices } = useMidi({
-    onNoteOn: (note, octave, _velocity) => {
+    onNoteOn: useCallback((note: string, octave: number, _velocity: number) => {
       handlePress(note, octave);
-    },
-    onNoteOff: (note, octave) => {
+    }, [handlePress]),
+    onNoteOff: useCallback((note: string, octave: number) => {
       handleRelease(note, octave);
-    },
+    }, [handleRelease]),
   });
 
   useEffect(() => {
     audioEngine.setInstrument(currentInstrument);
   }, [currentInstrument, audioEngine]);
 
+  // Keyboard handler — uses ref so effect doesn't re-register on every key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return;
       const mapping = KEYBOARD_MAP[e.key.toLowerCase()];
       if (!mapping) return;
-
       const adjustedOctave = mapping.octave + octaveShift;
-      const key = `${mapping.note}-${adjustedOctave}`;
-      
-      if (!pressedKeys.has(key)) {
-        setPressedKeys(prev => new Set(prev).add(key));
-        audioEngine.playNote(mapping.note, adjustedOctave);
-        onNoteOn?.(mapping.note, adjustedOctave);
-      }
+      handlePress(mapping.note, adjustedOctave);
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
       const mapping = KEYBOARD_MAP[e.key.toLowerCase()];
       if (!mapping) return;
-
       const adjustedOctave = mapping.octave + octaveShift;
-      const key = `${mapping.note}-${adjustedOctave}`;
-      
-      setPressedKeys(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(key);
-        return newSet;
-      });
-      audioEngine.stopNote(mapping.note, adjustedOctave);
-      onNoteOff?.(mapping.note, adjustedOctave);
+      handleRelease(mapping.note, adjustedOctave);
     };
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [audioEngine, octaveShift, pressedKeys]);
-
-  const handlePress = (note: string, octave: number) => {
-    const key = `${note}-${octave}`;
-    setPressedKeys(prev => new Set(prev).add(key));
-    audioEngine.playNote(note, octave);
-    onNoteOn?.(note, octave);
-  };
-
-  const handleRelease = (note: string, octave: number) => {
-    const key = `${note}-${octave}`;
-    setPressedKeys(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(key);
-      return newSet;
-    });
-    audioEngine.stopNote(note, octave);
-    onNoteOff?.(note, octave);
-  };
+  }, [octaveShift, handlePress, handleRelease]);
 
   const renderOctave = (octave: number) => {
     return (
@@ -166,7 +159,6 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument, highlighted
         {/* Signature branding plate - Ultra luxury gold */}
         <div className="absolute top-1.5 sm:top-2 md:top-3 left-1/2 -translate-x-1/2 z-10">
           <div className="relative px-4 sm:px-6 md:px-8 py-1 sm:py-1.5 bg-gradient-to-b from-amber-300/20 via-amber-200/10 to-amber-300/20 rounded-full border border-amber-400/40 backdrop-blur-md">
-            {/* Gold shine effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/30 to-transparent rounded-full animate-pulse-glow" />
             <p className="relative font-serif text-[10px] sm:text-xs md:text-sm tracking-[0.15em] sm:tracking-[0.2em] text-gold italic font-medium">
               Siraj Qureshi
@@ -176,10 +168,7 @@ export const Piano = ({ audioEngine, octaveShift, currentInstrument, highlighted
         
         {/* Piano keyboard container */}
         <div className="relative mt-6 sm:mt-8 md:mt-10">
-          {/* Keyboard base with wood grain effect */}
           <div className="absolute -inset-x-1 -bottom-2 h-4 bg-gradient-to-b from-[hsl(25,30%,15%)] to-[hsl(25,35%,10%)] rounded-b-xl" />
-          
-          {/* Keys */}
           <div className="relative flex min-w-max px-1">
             {[3 + octaveShift, 4 + octaveShift, 5 + octaveShift].map(renderOctave)}
           </div>

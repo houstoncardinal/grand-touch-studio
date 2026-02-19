@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 const MIDI_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -22,8 +22,13 @@ interface UseMidiOptions {
 export function useMidi({ onNoteOn, onNoteOff }: UseMidiOptions) {
   const [devices, setDevices] = useState<MidiDevice[]>([]);
   const [isSupported] = useState(() => !!navigator.requestMIDIAccess);
-  const [activeDevice, setActiveDevice] = useState<string | null>(null);
   const accessRef = useRef<MIDIAccess | null>(null);
+
+  // Use refs for callbacks to avoid re-binding MIDI listeners on every render
+  const onNoteOnRef = useRef(onNoteOn);
+  const onNoteOffRef = useRef(onNoteOff);
+  onNoteOnRef.current = onNoteOn;
+  onNoteOffRef.current = onNoteOff;
 
   const handleMidiMessage = useCallback((e: MIDIMessageEvent) => {
     const data = e.data;
@@ -35,12 +40,12 @@ export function useMidi({ onNoteOn, onNoteOff }: UseMidiOptions) {
 
     if (status === 0x90 && velocity > 0) {
       const { note, octave } = midiToNoteOctave(midiNote);
-      onNoteOn(note, octave, velocity / 127);
+      onNoteOnRef.current(note, octave, velocity / 127);
     } else if (status === 0x80 || (status === 0x90 && velocity === 0)) {
       const { note, octave } = midiToNoteOctave(midiNote);
-      onNoteOff(note, octave);
+      onNoteOffRef.current(note, octave);
     }
-  }, [onNoteOn, onNoteOff]);
+  }, []);
 
   const refreshDevices = useCallback((access: MIDIAccess) => {
     const devs: MidiDevice[] = [];
@@ -49,10 +54,7 @@ export function useMidi({ onNoteOn, onNoteOff }: UseMidiOptions) {
       input.onmidimessage = handleMidiMessage;
     });
     setDevices(devs);
-    if (devs.length > 0 && !activeDevice) {
-      setActiveDevice(devs[0].id);
-    }
-  }, [handleMidiMessage, activeDevice]);
+  }, [handleMidiMessage]);
 
   useEffect(() => {
     if (!isSupported) return;
@@ -61,9 +63,7 @@ export function useMidi({ onNoteOn, onNoteOff }: UseMidiOptions) {
       accessRef.current = access;
       refreshDevices(access);
       access.onstatechange = () => refreshDevices(access);
-    }).catch(() => {
-      // MIDI access denied or unavailable
-    });
+    }).catch(() => {});
 
     return () => {
       if (accessRef.current) {
@@ -74,5 +74,5 @@ export function useMidi({ onNoteOn, onNoteOff }: UseMidiOptions) {
     };
   }, [isSupported, refreshDevices]);
 
-  return { devices, isSupported, activeDevice };
+  return { devices, isSupported };
 }

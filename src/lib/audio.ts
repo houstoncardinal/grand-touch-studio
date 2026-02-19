@@ -16,7 +16,7 @@ export class AudioEngine {
   private currentInstrument: InstrumentType = 'grand-piano';
 
   constructor() {
-    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ latencyHint: 'interactive' });
     this.masterGain = this.audioContext.createGain();
     this.reverbGain = this.audioContext.createGain();
     this.reverbNode = this.audioContext.createConvolver();
@@ -183,6 +183,11 @@ export class AudioEngine {
   }
 
   playNote(note: string, octave: number) {
+    // Resume audio context if suspended (browser autoplay policy)
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
+
     const key = `${note}-${octave}`;
     if (this.activeNotes.has(key)) return;
 
